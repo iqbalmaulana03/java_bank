@@ -1,0 +1,40 @@
+version: "3.8"
+volumes:
+  simplebank-volume:
+networks:
+  simplebank-network:
+
+services:
+  db:
+    container_name: simplebank-db
+    image: "postgres:latest"
+    environment:
+      - POSTGRES_USERNAME=${DB_USERNAME}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=simple_bank
+    ports:
+      - "5432:5432"
+    volumes:
+      - simplebank-volume:/var/lib/postgresql/data
+    networks:
+      - simplebank-network
+
+  backend:
+    container_name: simplebank-api
+    # Diambil dari Dockerfile
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+    environment:
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_EXPIRATION=${JWT_EXPIRATION}
+    networks:
+      - simplebank-network
